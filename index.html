@@ -38,6 +38,7 @@
 <div class="card">
   <div class="icon-big">🛡️</div>
   <h1>Safety Kavach Alerts</h1>
+  <button id="install-app-btn" onclick="installApp()" style="display:none;width:100%;padding:12px;margin-bottom:16px;border:none;border-radius:12px;background:#1B6B3A;color:#fff;font-weight:700;font-size:14px;cursor:pointer;">📲 Install App</button>
 
   <!-- ── Registration form ── -->
   <div class="form-view" id="form-view">
@@ -63,8 +64,23 @@
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
   import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging.js";
+
+  let deferredInstallPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    const btn = document.getElementById('install-app-btn');
+    if (btn) btn.style.display = 'block';
+  });
+  window.installApp = async function () {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    document.getElementById('install-app-btn').style.display = 'none';
+  };
 
   // Public client config — safe to expose, not a secret (see README).
   const firebaseConfig = {
