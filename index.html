@@ -56,10 +56,14 @@
 
   <!-- ── Already registered view ── -->
   <div class="registered-view" id="registered-view">
-    <div class="sub">Alerts are active on this device for:</div>
+    <div class="icon-big" style="font-size:36px;">✅</div>
+    <div class="sub" id="registered-headline">Alerts are active on this device for:</div>
     <div class="emp-chip" id="registered-emp"></div>
-    <div class="sub" style="margin-bottom:20px;">You'll get a push notification whenever something is assigned or updated for you in Safety Kavach.</div>
-    <button class="link-btn" onclick="switchEmployee()">Not you? Switch employee</button>
+    <div class="sub" style="margin-bottom:14px;" id="registered-subtext">You'll get a push notification whenever something is assigned or updated for you in Safety Kavach.</div>
+    <div class="sub" style="font-weight:700;color:#1B6B3A;margin-bottom:14px;" id="redirect-countdown">Opening Safety Kavach portal in 3…</div>
+    <button id="btn-open-portal" onclick="openPortalNow()" style="width:100%;padding:12px;margin-bottom:10px;border:none;border-radius:12px;background:#1B6B3A;color:#fff;font-weight:700;font-size:14px;cursor:pointer;">🌐 Open Portal Now</button>
+    <button id="btn-reenable" onclick="reEnableNotifications()" style="width:100%;padding:11px;margin-bottom:14px;border:1.5px solid #1B6B3A;border-radius:12px;background:#fff;color:#1B6B3A;font-weight:700;font-size:13.5px;cursor:pointer;">🔔 Re-enable Notifications</button>
+    <button class="link-btn" onclick="cancelRedirectAndSwitch()">Not you? Switch employee</button>
   </div>
 </div>
 
@@ -201,8 +205,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
   }
 
   function startRedirectCountdown() {
+    if (redirectTimeoutId) clearTimeout(redirectTimeoutId);
+    if (redirectIntervalId) clearInterval(redirectIntervalId);
     let secondsLeft = 3;
     const countdownEl = document.getElementById('redirect-countdown');
+    countdownEl.style.display = '';
     countdownEl.textContent = 'Opening Safety Kavach portal in ' + secondsLeft + '…';
 
     redirectIntervalId = setInterval(() => {
@@ -217,10 +224,67 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
     }, 3000);
   }
 
+  window.openPortalNow = function () {
+    if (redirectTimeoutId) clearTimeout(redirectTimeoutId);
+    if (redirectIntervalId) clearInterval(redirectIntervalId);
+    window.location.replace(PORTAL_URL);
+  };
+
   window.cancelRedirectAndSwitch = function () {
     if (redirectTimeoutId) clearTimeout(redirectTimeoutId);
     if (redirectIntervalId) clearInterval(redirectIntervalId);
     switchEmployee();
+  };
+
+  // Re-runs the permission + token + save flow for the CURRENTLY saved
+  // employee code — useful if notifications stopped working (permission
+  // revoked, token went stale) without needing to "switch employee" first.
+  window.reEnableNotifications = async function () {
+    const savedCode = localStorage.getItem('sk_emp_code');
+    if (!savedCode) { switchEmployee(); return; }
+    if (redirectTimeoutId) clearTimeout(redirectTimeoutId);
+    if (redirectIntervalId) clearInterval(redirectIntervalId);
+    document.getElementById('redirect-countdown').style.display = 'none';
+
+    const btn = document.getElementById('btn-reenable');
+    const originalText = btn.textContent;
+    btn.textContent = '🔄 Re-enabling…';
+    btn.disabled = true;
+
+    if (!('serviceWorker' in navigator) || !messaging) {
+      btn.textContent = originalText; btn.disabled = false;
+      alert('Push notifications are not supported on this browser.');
+      return;
+    }
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        btn.textContent = originalText; btn.disabled = false;
+        alert('Permission denied — please enable notifications for this app in your device settings.');
+        return;
+      }
+      const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+      const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
+      if (!token) { btn.textContent = originalText; btn.disabled = false; alert('Could not get a device token. Please try again.'); return; }
+
+      const res = await fetch(GAS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'savePushToken', data: { employeeCode: savedCode, token: token, platform: navigator.platform || 'web' } })
+      });
+      const result = await res.json();
+      btn.textContent = originalText; btn.disabled = false;
+      if (result && result.success) {
+        localStorage.setItem('sk_fcm_token', token);
+        alert('✅ Notifications re-enabled for ' + savedCode);
+        startRedirectCountdown();
+      } else {
+        alert('Server did not confirm registration: ' + ((result && result.error) || 'unknown error'));
+      }
+    } catch (err) {
+      btn.textContent = originalText; btn.disabled = false;
+      alert('Something went wrong: ' + err.message);
+    }
   };
 
   window.switchEmployee = function () {
