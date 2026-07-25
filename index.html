@@ -95,6 +95,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 
   // ⚠️ TODO: replace with YOUR deployed GAS Web App URL (the same one the main portal calls).
   const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbzr7RvqlFn-tOUVQ52ilnVymchWbC5yBVAlkn81YovIinHMwkdGLVEgHtEhaX0h7uij/exec";
+  // The portal itself is served by the SAME deployed Web App (doGet() renders it) —
+  // so opening this URL takes the user straight into Safety Kavach.
+  const PORTAL_URL = GAS_ENDPOINT;
+  let redirectTimeoutId = null;
+  let redirectIntervalId = null;
 
   const app = initializeApp(firebaseConfig);
   let messaging;
@@ -164,7 +169,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
       if (result && result.success) {
         localStorage.setItem('sk_emp_code', empCode);
         localStorage.setItem('sk_fcm_token', token);
-        showRegisteredView(empCode);
+        showRegisteredView(empCode, { freshRegistration: true });
       } else {
         setStatus((result && result.error) || 'Server did not confirm registration.', false);
         btn.disabled = false;
@@ -176,13 +181,51 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
     }
   };
 
-  function showRegisteredView(empCode) {
+  function showRegisteredView(empCode, opts) {
+    opts = opts || {};
     document.getElementById('form-view').classList.add('hide');
     document.getElementById('registered-view').classList.add('show');
     document.getElementById('registered-emp').textContent = 'Employee Code: ' + empCode;
+
+    const headline = document.getElementById('registered-headline');
+    const subtext  = document.getElementById('registered-subtext');
+    if (opts.freshRegistration) {
+      headline.textContent = '🎉 Notifications enabled for:';
+      subtext.textContent  = "You'll get a push notification whenever something is assigned or updated for you in Safety Kavach.";
+    } else {
+      headline.textContent = 'Welcome back:';
+      subtext.textContent  = 'Taking you to the Safety Kavach portal…';
+    }
+
+    startRedirectCountdown();
   }
 
+  function startRedirectCountdown() {
+    let secondsLeft = 3;
+    const countdownEl = document.getElementById('redirect-countdown');
+    countdownEl.textContent = 'Opening Safety Kavach portal in ' + secondsLeft + '…';
+
+    redirectIntervalId = setInterval(() => {
+      secondsLeft -= 1;
+      if (secondsLeft > 0) countdownEl.textContent = 'Opening Safety Kavach portal in ' + secondsLeft + '…';
+    }, 1000);
+
+    redirectTimeoutId = setTimeout(() => {
+      // location.replace keeps this in the SAME standalone PWA window
+      // (no new tab, no back-button trail) instead of location.href.
+      window.location.replace(PORTAL_URL);
+    }, 3000);
+  }
+
+  window.cancelRedirectAndSwitch = function () {
+    if (redirectTimeoutId) clearTimeout(redirectTimeoutId);
+    if (redirectIntervalId) clearInterval(redirectIntervalId);
+    switchEmployee();
+  };
+
   window.switchEmployee = function () {
+    if (redirectTimeoutId) clearTimeout(redirectTimeoutId);
+    if (redirectIntervalId) clearInterval(redirectIntervalId);
     localStorage.removeItem('sk_emp_code');
     localStorage.removeItem('sk_fcm_token');
     document.getElementById('registered-view').classList.remove('show');
@@ -192,10 +235,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
     setStatus('', true);
   };
 
-  // Auto-skip to "registered" view if we already have a saved token for this device.
+  // Every time the installed app icon is opened, if this device is already
+  // registered, skip the form entirely and go straight into the countdown
+  // → auto-redirect to the portal (the actual "PWA launcher" behavior).
   window.addEventListener('DOMContentLoaded', () => {
     const savedCode = localStorage.getItem('sk_emp_code');
-    if (savedCode) showRegisteredView(savedCode);
+    if (savedCode) showRegisteredView(savedCode, { freshRegistration: false });
   });
 </script>
 </body>
