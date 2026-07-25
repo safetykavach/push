@@ -47,3 +47,7 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
+
+// Empty passthrough fetch handler — some browsers require at least one
+// registered 'fetch' listener for a service worker to count as installable.
+self.addEventListener('fetch', () => {});
