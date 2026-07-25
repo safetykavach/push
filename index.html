@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Safety Kavach Alerts</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1B6B3A">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: linear-gradient(160deg,#0d3320,#1B6B3A 60%,#2E9E58); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .card { background: #fff; border-radius: 24px; padding: 32px 24px; max-width: 380px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center; }
+  h1 { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 24px; color: #1B6B3A; margin-bottom: 4px; }
+  .sub { font-size: 13px; color: #6b7f74; margin-bottom: 24px; }
+  input#emp-code { width: 100%; text-align: center; font-family: 'Rajdhani', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: 6px; border: 2px solid #C8DDD0; border-radius: 12px; padding: 14px; color: #1B6B3A; background: #f3f6f3; outline: none; margin-bottom: 16px; }
+  .keypad { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 20px; }
+  .keypad button { padding: 14px; border-radius: 12px; border: 1px solid #e2e8e5; background: #fff; font-size: 18px; font-weight: 700; color: #333; cursor: pointer; }
+  .keypad button:active { background: #eef5f0; }
+  button#btn-register { width: 100%; padding: 14px; border: none; border-radius: 12px; background: #1B6B3A; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; }
+  button#btn-register:disabled { opacity: 0.6; }
+  #status { margin-top: 14px; font-size: 12.5px; font-weight: 600; min-height: 18px; }
+  #status.ok { color: #1B6B3A; }
+  #status.err { color: #c0392b; }
+  .registered-view { display: none; }
+  .registered-view.show { display: block; }
+  .form-view.hide { display: none; }
+  .icon-big { font-size: 44px; margin-bottom: 8px; }
+  .emp-chip { display: inline-block; background: #E0EDE6; color: #1B6B3A; font-weight: 700; padding: 6px 14px; border-radius: 20px; font-size: 13px; margin: 10px 0 18px; }
+  .link-btn { background: none; border: none; color: #6b7f74; font-size: 12.5px; text-decoration: underline; cursor: pointer; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="icon-big">🛡️</div>
+  <h1>Safety Kavach Alerts</h1>
+
+  <!-- ── Registration form ── -->
+  <div class="form-view" id="form-view">
+    <div class="sub">Enter your Employee Code to receive real-time hazard, action & training alerts on this device.</div>
+    <input type="password" inputmode="numeric" id="emp-code" placeholder="Employee Code" readonly>
+    <div class="keypad">
+      <button onclick="key('1')">1</button><button onclick="key('2')">2</button><button onclick="key('3')">3</button>
+      <button onclick="key('4')">4</button><button onclick="key('5')">5</button><button onclick="key('6')">6</button>
+      <button onclick="key('7')">7</button><button onclick="key('8')">8</button><button onclick="key('9')">9</button>
+      <button onclick="key('back')">⌫</button><button onclick="key('0')">0</button><button onclick="key('clear')">C</button>
+    </div>
+    <button id="btn-register" onclick="registerDevice()">🔔 Enable Alerts</button>
+    <div id="status"></div>
+  </div>
+
+  <!-- ── Already registered view ── -->
+  <div class="registered-view" id="registered-view">
+    <div class="sub">Alerts are active on this device for:</div>
+    <div class="emp-chip" id="registered-emp"></div>
+    <div class="sub" style="margin-bottom:20px;">You'll get a push notification whenever something is assigned or updated for you in Safety Kavach.</div>
+    <button class="link-btn" onclick="switchEmployee()">Not you? Switch employee</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging.js";
+
+  // Public client config — safe to expose, not a secret (see README).
+  const firebaseConfig = {
+    apiKey: "AIzaSyDZW1b3to3ojC6LUexZfzsmspdF98y6nvM",
+    authDomain: "safety-kavach-notifications.firebaseapp.com",
+    projectId: "safety-kavach-notifications",
+    storageBucket: "safety-kavach-notifications.firebasestorage.app",
+    messagingSenderId: "1026372115744",
+    appId: "1:1026372115744:web:8a84e4dc63bc945cdccb45"
+  };
+  const VAPID_KEY = "BJ79xBqGYfT8WAKozzZ8D-KgnipuzlFqcfNODOCkZ7xsFrgR9PYgWR0cYrxIY8Mem2gHnlJWLBo4m54pABZ4-ks";
+
+  // ⚠️ TODO: replace with YOUR deployed GAS Web App URL (the same one the main portal calls).
+  const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbzr7RvqlFn-tOUVQ52ilnVymchWbC5yBVAlkn81YovIinHMwkdGLVEgHtEhaX0h7uij/exec";
+
+  const app = initializeApp(firebaseConfig);
+  let messaging;
+  try { messaging = getMessaging(app); } catch (e) { console.warn("Messaging init failed (maybe unsupported browser):", e); }
+
+  window.key = function (k) {
+    const inp = document.getElementById('emp-code');
+    if (k === 'back') inp.value = inp.value.slice(0, -1);
+    else if (k === 'clear') inp.value = '';
+    else if (inp.value.length < 8) inp.value += k;
+  };
+
+  function setStatus(msg, ok) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = ok ? 'ok' : 'err';
+  }
+
+  window.registerDevice = async function () {
+    const empCode = document.getElementById('emp-code').value.trim();
+    if (!empCode) { setStatus('Please enter your Employee Code first.', false); return; }
+    if (!('serviceWorker' in navigator) || !messaging) { setStatus('Push notifications are not supported on this browser.', false); return; }
+
+    const btn = document.getElementById('btn-register');
+    btn.disabled = true;
+    setStatus('Requesting permission…', true);
+
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        setStatus('Permission denied — please enable notifications for this app in your device settings.', false);
+        btn.disabled = false;
+        return;
+      }
+
+      const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+      const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
+
+      if (!token) {
+        setStatus('Could not get a device token. Please try again.', false);
+        btn.disabled = false;
+        return;
+      }
+
+      setStatus('Saving device…', true);
+      const res = await fetch(GAS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids CORS preflight on GAS
+        body: JSON.stringify({ action: 'savePushToken', data: { employeeCode: empCode, token: token, platform: navigator.platform || 'web' } })
+      });
+      const result = await res.json();
+
+      if (result && result.success) {
+        localStorage.setItem('sk_emp_code', empCode);
+        localStorage.setItem('sk_fcm_token', token);
+        showRegisteredView(empCode);
+      } else {
+        setStatus((result && result.error) || 'Server did not confirm registration.', false);
+        btn.disabled = false;
+      }
+    } catch (err) {
+      console.error(err);
+      setStatus('Something went wrong: ' + err.message, false);
+      btn.disabled = false;
+    }
+  };
+
+  function showRegisteredView(empCode) {
+    document.getElementById('form-view').classList.add('hide');
+    document.getElementById('registered-view').classList.add('show');
+    document.getElementById('registered-emp').textContent = 'Employee Code: ' + empCode;
+  }
+
+  window.switchEmployee = function () {
+    localStorage.removeItem('sk_emp_code');
+    localStorage.removeItem('sk_fcm_token');
+    document.getElementById('registered-view').classList.remove('show');
+    document.getElementById('form-view').classList.remove('hide');
+    document.getElementById('emp-code').value = '';
+    document.getElementById('btn-register').disabled = false;
+    setStatus('', true);
+  };
+
+  // Auto-skip to "registered" view if we already have a saved token for this device.
+  window.addEventListener('DOMContentLoaded', () => {
+    const savedCode = localStorage.getItem('sk_emp_code');
+    if (savedCode) showRegisteredView(savedCode);
+  });
+</script>
+</body>
+</html>
