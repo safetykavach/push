@@ -65,7 +65,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-  import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging.js";
+  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging.js";
 
   let deferredInstallPrompt = null;
   window.addEventListener('beforeinstallprompt', (e) => {
@@ -99,6 +99,20 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
   const app = initializeApp(firebaseConfig);
   let messaging;
   try { messaging = getMessaging(app); } catch (e) { console.warn("Messaging init failed (maybe unsupported browser):", e); }
+ // Foreground messages (tab open + focused) don't trigger the service
+  // worker's onBackgroundMessage — show them manually via the Notification API.
+  if (messaging) {
+    onMessage(messaging, (payload) => {
+      const title = payload.notification?.title || 'Safety Kavach Alert';
+      const body = payload.notification?.body || '';
+      if (Notification.permission === 'granted') {
+        navigator.serviceWorker.getRegistration().then((reg) => {
+          if (reg) reg.showNotification(title, { body, icon: 'icon-192.png' });
+          else new Notification(title, { body, icon: 'icon-192.png' });
+        });
+      }
+    });
+  }
 
   window.key = function (k) {
     const inp = document.getElementById('emp-code');
