@@ -1,6 +1,6 @@
 {
   "name": "Safety Kavach Alerts",
-  "short_name": "SK Alerts",
+  "short_name": "Safety Kavach",
   "description": "Companion app for real-time Safety Kavach EHS portal notifications",
   "start_url": "./index.html",
   "scope": "./",
