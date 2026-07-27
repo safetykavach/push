@@ -198,10 +198,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
       subtext.textContent  = "You'll get a push notification whenever something is assigned or updated for you in Safety Kavach.";
     } else {
       headline.textContent = 'Welcome back:';
-      subtext.textContent  = 'Taking you to the Safety Kavach portal…';
+      subtext.textContent  = 'Tap below to open the Safety Kavach portal.';
     }
 
-    startRedirectCountdown();
+    // Auto-redirect disabled — user now opens the portal manually via the
+    // "🌐 Open Portal Now" button. Just hide the (now-unused) countdown text.
+    const countdownEl = document.getElementById('redirect-countdown');
+    if (countdownEl) countdownEl.style.display = 'none';
   }
 
   function startRedirectCountdown() {
