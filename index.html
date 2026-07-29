@@ -62,8 +62,54 @@
     <div class="sub" style="margin-bottom:14px;" id="registered-subtext">You'll get a push notification whenever something is assigned or updated for you in Safety Kavach.</div>
     <div class="sub" style="font-weight:700;color:#1B6B3A;margin-bottom:14px;" id="redirect-countdown">Opening Safety Kavach portal in 3…</div>
     <button id="btn-open-portal" onclick="openPortalNow()" style="width:100%;padding:12px;margin-bottom:10px;border:none;border-radius:12px;background:#1B6B3A;color:#fff;font-weight:700;font-size:14px;cursor:pointer;">🌐 Open Portal Now</button>
-    <button id="btn-reenable" onclick="reEnableNotifications()" style="width:100%;padding:11px;margin-bottom:14px;border:1.5px solid #1B6B3A;border-radius:12px;background:#fff;color:#1B6B3A;font-weight:700;font-size:13.5px;cursor:pointer;">🔔 Re-enable Notifications</button>
+    <button id="btn-reenable" onclick="reEnableNotifications()" style="width:100%;padding:11px;margin-bottom:10px;border:1.5px solid #1B6B3A;border-radius:12px;background:#fff;color:#1B6B3A;font-weight:700;font-size:13.5px;cursor:pointer;">🔔 Re-enable Notifications</button>
+    <button id="btn-my-stats" onclick="openMyStats()" style="display:none;width:100%;padding:11px;margin-bottom:10px;border:1.5px solid #E07B1A;border-radius:12px;background:#fff;color:#E07B1A;font-weight:700;font-size:13.5px;cursor:pointer;">📊 My Monthly Stats</button>
+    <button id="btn-admin-tools" onclick="openAdminGate()" style="width:100%;padding:9px;margin-bottom:14px;border:1.5px dashed #999;border-radius:12px;background:#fff;color:#666;font-weight:600;font-size:12px;cursor:pointer;">⚙️ Admin Tools</button>
     <button class="link-btn" onclick="cancelRedirectAndSwitch()">Not you? Switch employee</button>
+  </div>
+</div>
+
+<!-- ── Admin Tools Modal ── -->
+<div id="admin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:20px;padding:22px;max-width:420px;width:100%;max-height:88vh;overflow-y:auto;">
+    <div id="admin-pwd-view">
+      <h2 style="font-family:'Rajdhani',sans-serif;color:#1B6B3A;margin-bottom:10px;">⚙️ Admin Access</h2>
+      <input type="password" id="admin-pwd-input" placeholder="Admin Password" style="width:100%;padding:12px;border:1.5px solid #C8DDD0;border-radius:10px;margin-bottom:10px;font-size:15px;">
+      <button onclick="checkAdminPwd()" style="width:100%;padding:12px;border:none;border-radius:10px;background:#1B6B3A;color:#fff;font-weight:700;cursor:pointer;">Unlock</button>
+      <div id="admin-pwd-status" style="margin-top:8px;font-size:12.5px;color:#c0392b;"></div>
+      <button class="link-btn" onclick="closeAdminModal()" style="display:block;margin:12px auto 0;">Cancel</button>
+    </div>
+    <div id="admin-tools-view" style="display:none;">
+      <h2 style="font-family:'Rajdhani',sans-serif;color:#1B6B3A;margin-bottom:12px;">⚙️ Admin Tools</h2>
+
+      <div style="font-weight:700;font-size:13px;margin-bottom:6px;">📋 Registered Employee Codes</div>
+      <div id="admin-registered-list" style="max-height:150px;overflow-y:auto;border:1px solid #eee;border-radius:8px;padding:8px;margin-bottom:16px;font-size:12px;"></div>
+
+      <div style="font-weight:700;font-size:13px;margin-bottom:6px;">📢 Send Push Message</div>
+      <input type="text" id="broadcast-title" placeholder="Title (optional)" style="width:100%;padding:10px;border:1.5px solid #ddd;border-radius:8px;margin-bottom:8px;font-size:13px;">
+      <textarea id="broadcast-message" placeholder="Message to send…" rows="3" style="width:100%;padding:10px;border:1.5px solid #ddd;border-radius:8px;margin-bottom:8px;font-size:13px;resize:vertical;"></textarea>
+
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <label style="flex:1;font-size:12px;"><input type="radio" name="bcast-target" value="all" checked onchange="broadcastTargetChanged()"> All</label>
+        <label style="flex:1;font-size:12px;"><input type="radio" name="bcast-target" value="departments" onchange="broadcastTargetChanged()"> Dept</label>
+        <label style="flex:1;font-size:12px;"><input type="radio" name="bcast-target" value="employees" onchange="broadcastTargetChanged()"> Employees</label>
+      </div>
+      <div id="broadcast-dept-select" style="display:none;margin-bottom:8px;"></div>
+      <div id="broadcast-emp-select" style="display:none;margin-bottom:8px;max-height:150px;overflow-y:auto;border:1px solid #eee;border-radius:8px;padding:6px;"></div>
+
+      <button onclick="sendBroadcast()" style="width:100%;padding:12px;border:none;border-radius:10px;background:#E07B1A;color:#fff;font-weight:700;cursor:pointer;">📤 Send Now</button>
+      <div id="broadcast-status" style="margin-top:8px;font-size:12.5px;"></div>
+      <button class="link-btn" onclick="closeAdminModal()" style="display:block;margin:12px auto 0;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── My Stats Modal ── -->
+<div id="stats-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:20px;padding:22px;max-width:380px;width:100%;">
+    <h2 style="font-family:'Rajdhani',sans-serif;color:#1B6B3A;margin-bottom:14px;">📊 My Monthly Stats</h2>
+    <div id="stats-content" style="font-size:13.5px;"></div>
+    <button class="link-btn" onclick="document.getElementById('stats-modal').style.display='none'" style="display:block;margin:14px auto 0;">Close</button>
   </div>
 </div>
 
@@ -302,13 +348,133 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
     setStatus('', true);
   };
 
-  // Every time the installed app icon is opened, if this device is already
+ // Every time the installed app icon is opened, if this device is already
   // registered, skip the form entirely and go straight into the countdown
   // → auto-redirect to the portal (the actual "PWA launcher" behavior).
   window.addEventListener('DOMContentLoaded', () => {
     const savedCode = localStorage.getItem('sk_emp_code');
-    if (savedCode) showRegisteredView(savedCode, { freshRegistration: false });
+    if (savedCode) {
+      showRegisteredView(savedCode, { freshRegistration: false });
+      checkStatsFeatureFlag();
+    }
   });
+
+  // ── My Monthly Stats ──
+  async function checkStatsFeatureFlag() {
+    try {
+      const res = await fetch(GAS_ENDPOINT, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'getPwaFeatureFlags', data: {} })
+      });
+      const result = await res.json();
+      if (result && result.success && result.enableStats) {
+        document.getElementById('btn-my-stats').style.display = 'block';
+      }
+    } catch (e) { console.error(e); }
+  }
+
+  window.openMyStats = async function () {
+    const empCode = localStorage.getItem('sk_emp_code');
+    document.getElementById('stats-modal').style.display = 'flex';
+    document.getElementById('stats-content').innerHTML = 'Loading…';
+    try {
+      const res = await fetch(GAS_ENDPOINT, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'getMyMonthlyStats', data: { empCode } })
+      });
+      const s = await res.json();
+      if (!s || !s.success) { document.getElementById('stats-content').innerHTML = 'Could not load stats: ' + ((s && s.error) || 'unknown error'); return; }
+      document.getElementById('stats-content').innerHTML = `
+        <div style="margin-bottom:10px;"><b>${s.name}</b> — ${s.monthKey}</div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">🔴 Unsafe Act <b>${s.unsafeActCount}</b></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">🟠 Unsafe Condition <b>${s.unsafeConditionCount}</b></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">🦺 BBS Reported <b>${s.bbsCount}</b>${s.targets.bbs ? ' / ' + s.targets.bbs : ''}</div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">🎓 Training Hrs Received (This Month) <b>${s.trainingHoursReceivedThisMonth}</b>${s.targets.trainingHrs ? ' / ' + s.targets.trainingHrs : ''}</div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;">👨‍🏫 Training Hrs Given (All-Time) <b>${s.trainingHoursGivenAllTime}</b></div>
+      `;
+    } catch (e) { document.getElementById('stats-content').innerHTML = 'Error: ' + e.message; }
+  };
+
+  // ── Admin Tools ──
+  window.openAdminGate = function () {
+    document.getElementById('admin-modal').style.display = 'flex';
+    document.getElementById('admin-pwd-view').style.display = 'block';
+    document.getElementById('admin-tools-view').style.display = 'none';
+    document.getElementById('admin-pwd-input').value = '';
+    document.getElementById('admin-pwd-status').textContent = '';
+  };
+  window.closeAdminModal = function () { document.getElementById('admin-modal').style.display = 'none'; };
+
+  window.checkAdminPwd = async function () {
+    const pwd = document.getElementById('admin-pwd-input').value;
+    const res = await fetch(GAS_ENDPOINT, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'verifyPwaAdminPassword', data: { password: pwd } })
+    });
+    const result = await res.json();
+    if (result && result.success) {
+      document.getElementById('admin-pwd-view').style.display = 'none';
+      document.getElementById('admin-tools-view').style.display = 'block';
+      loadAdminToolsData();
+    } else {
+      document.getElementById('admin-pwd-status').textContent = 'Incorrect password.';
+    }
+  };
+
+  let _activeEmployees = [];
+
+  async function loadAdminToolsData() {
+    const regRes = await fetch(GAS_ENDPOINT, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getPwaRegisteredEmployees', data: {} })
+    });
+    const reg = await regRes.json();
+    const listEl = document.getElementById('admin-registered-list');
+    listEl.innerHTML = (reg.employees || []).length
+      ? reg.employees.map(e => `<div>${e['Employee Code']} — ${e['Name'] || '?'} (${e['Department'] || '—'}) · ${e['Device Count']} device(s)</div>`).join('')
+      : '<i>No employees registered yet.</i>';
+
+    const empRes = await fetch(GAS_ENDPOINT, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getActiveEmployeesList', data: {} })
+    });
+    const empData = await empRes.json();
+    _activeEmployees = empData.employees || [];
+
+    const depts = [...new Set(_activeEmployees.map(e => e.dept).filter(Boolean))];
+    document.getElementById('broadcast-dept-select').innerHTML = depts.map(d =>
+      `<label style="display:block;font-size:12px;"><input type="checkbox" class="bcast-dept-chk" value="${d}"> ${d}</label>`
+    ).join('');
+    document.getElementById('broadcast-emp-select').innerHTML = _activeEmployees.map(e =>
+      `<label style="display:block;font-size:12px;"><input type="checkbox" class="bcast-emp-chk" value="${e.empCode}"> ${e.name} (${e.empCode})</label>`
+    ).join('');
+  }
+
+  window.broadcastTargetChanged = function () {
+    const target = document.querySelector('input[name="bcast-target"]:checked').value;
+    document.getElementById('broadcast-dept-select').style.display = target === 'departments' ? 'block' : 'none';
+    document.getElementById('broadcast-emp-select').style.display = target === 'employees' ? 'block' : 'none';
+  };
+
+  window.sendBroadcast = async function () {
+    const target = document.querySelector('input[name="bcast-target"]:checked').value;
+    const title = document.getElementById('broadcast-title').value.trim();
+    const message = document.getElementById('broadcast-message').value.trim();
+    if (!message) { document.getElementById('broadcast-status').textContent = 'Please enter a message.'; return; }
+
+    const departments = [...document.querySelectorAll('.bcast-dept-chk:checked')].map(el => el.value);
+    const empCodes = [...document.querySelectorAll('.bcast-emp-chk:checked')].map(el => el.value);
+
+    document.getElementById('broadcast-status').textContent = 'Sending…';
+    const res = await fetch(GAS_ENDPOINT, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'sendBroadcastPush', data: { title, message, target, departments, empCodes } })
+    });
+    const result = await res.json();
+    document.getElementById('broadcast-status').textContent = result.success
+      ? `✅ Sent to ${result.sent}/${result.targeted} (${result.failed} failed)`
+      : `❌ ${result.error}`;
+  };
 </script>
 </body>
 </html>
