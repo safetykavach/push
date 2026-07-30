@@ -353,447 +353,262 @@ async function renderStatsOrReadyState(savedCode) {
     showStageOnly();
     setRippleColor('#2E9E58', null, '#1B6B3A', '#2E9E58');
     document.getElementById('center-icon').textContent = '✅';
-    document.getElementById('stage-label').te
-<div class="card">
-  <div class="icon-big">🛡️</div>
-  <h1>Safety Kavach Alerts</h1>
-  <button id="install-app-btn" onclick="installApp()" style="display:none;width:100%;padding:12px;margin-bottom:16px;border:none;border-radius:12px;background:#1B6B3A;color:#fff;font-weight:700;font-size:14px;cursor:pointer;">📲 Install App</button>
-
-  <!-- ── Registration form ── -->
-  <div class="form-view" id="form-view">
-    <div class="sub">Enter your Employee Code to receive real-time hazard, action & training alerts on this device.</div>
-    <input type="password" inputmode="numeric" id="emp-code" placeholder="Employee Code" readonly>
-    <div class="keypad">
-      <button onclick="key('1')">1</button><button onclick="key('2')">2</button><button onclick="key('3')">3</button>
-      <button onclick="key('4')">4</button><button onclick="key('5')">5</button><button onclick="key('6')">6</button>
-      <button onclick="key('7')">7</button><button onclick="key('8')">8</button><button onclick="key('9')">9</button>
-      <button onclick="key('back')">⌫</button><button onclick="key('0')">0</button><button onclick="key('clear')">C</button>
-    </div>
-    <button id="btn-register" onclick="registerDevice()">🔔 Enable Alerts</button>
-    <div id="status"></div>
-  </div>
-
-  <!-- ── Already registered view ── -->
-  <div class="registered-view" id="registered-view">
-    <div class="icon-big" style="font-size:36px;">✅</div>
-    <div class="sub" id="registered-headline">Alerts are active on this device for:</div>
-    <div class="emp-chip" id="registered-emp"></div>
-    <div class="sub" style="margin-bottom:14px;" id="registered-subtext">You'll get a push notification whenever something is assigned or updated for you in Safety Kavach.</div>
-    <div class="sub" style="font-weight:700;color:#1B6B3A;margin-bottom:14px;" id="redirect-countdown">Opening Safety Kavach portal in 3…</div>
-    <button id="btn-open-portal" onclick="openPortalNow()" style="width:100%;padding:12px;margin-bottom:10px;border:none;border-radius:12px;background:#1B6B3A;color:#fff;font-weight:700;font-size:14px;cursor:pointer;">🌐 Open Portal Now</button>
-    <button id="btn-reenable" onclick="reEnableNotifications()" style="width:100%;padding:11px;margin-bottom:10px;border:1.5px solid #1B6B3A;border-radius:12px;background:#fff;color:#1B6B3A;font-weight:700;font-size:13.5px;cursor:pointer;">🔔 Re-enable Notifications</button>
-    <button id="btn-my-stats" onclick="openMyStats()" style="display:none;width:100%;padding:11px;margin-bottom:10px;border:1.5px solid #E07B1A;border-radius:12px;background:#fff;color:#E07B1A;font-weight:700;font-size:13.5px;cursor:pointer;">📊 My Monthly Stats</button>
-    <button id="btn-admin-tools" onclick="openAdminGate()" style="width:100%;padding:9px;margin-bottom:14px;border:1.5px dashed #999;border-radius:12px;background:#fff;color:#666;font-weight:600;font-size:12px;cursor:pointer;">⚙️ Admin Tools</button>
-    <button class="link-btn" onclick="cancelRedirectAndSwitch()">Not you? Switch employee</button>
-  </div>
-</div>
-
-<!-- ── Admin Tools Modal ── -->
-<div id="admin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#fff;border-radius:20px;padding:22px;max-width:420px;width:100%;max-height:88vh;overflow-y:auto;">
-    <div id="admin-pwd-view">
-      <h2 style="font-family:'Rajdhani',sans-serif;color:#1B6B3A;margin-bottom:10px;">⚙️ Admin Access</h2>
-      <input type="password" id="admin-pwd-input" placeholder="Admin Password" style="width:100%;padding:12px;border:1.5px solid #C8DDD0;border-radius:10px;margin-bottom:10px;font-size:15px;">
-      <button onclick="checkAdminPwd()" style="width:100%;padding:12px;border:none;border-radius:10px;background:#1B6B3A;color:#fff;font-weight:700;cursor:pointer;">Unlock</button>
-      <div id="admin-pwd-status" style="margin-top:8px;font-size:12.5px;color:#c0392b;"></div>
-      <button class="link-btn" onclick="closeAdminModal()" style="display:block;margin:12px auto 0;">Cancel</button>
-    </div>
-    <div id="admin-tools-view" style="display:none;">
-      <h2 style="font-family:'Rajdhani',sans-serif;color:#1B6B3A;margin-bottom:12px;">⚙️ Admin Tools</h2>
-
-      <div style="font-weight:700;font-size:13px;margin-bottom:6px;">📋 Registered Employee Codes</div>
-      <div id="admin-registered-list" style="max-height:150px;overflow-y:auto;border:1px solid #eee;border-radius:8px;padding:8px;margin-bottom:16px;font-size:12px;"></div>
-
-      <div style="font-weight:700;font-size:13px;margin-bottom:6px;">📢 Send Push Message</div>
-      <input type="text" id="broadcast-title" placeholder="Title (optional)" style="width:100%;padding:10px;border:1.5px solid #ddd;border-radius:8px;margin-bottom:8px;font-size:13px;">
-      <textarea id="broadcast-message" placeholder="Message to send…" rows="3" style="width:100%;padding:10px;border:1.5px solid #ddd;border-radius:8px;margin-bottom:8px;font-size:13px;resize:vertical;"></textarea>
-
-      <div style="display:flex;gap:6px;margin-bottom:8px;">
-        <label style="flex:1;font-size:12px;"><input type="radio" name="bcast-target" value="all" checked onchange="broadcastTargetChanged()"> All</label>
-        <label style="flex:1;font-size:12px;"><input type="radio" name="bcast-target" value="departments" onchange="broadcastTargetChanged()"> Dept</label>
-        <label style="flex:1;font-size:12px;"><input type="radio" name="bcast-target" value="employees" onchange="broadcastTargetChanged()"> Employees</label>
-      </div>
-      <div id="broadcast-dept-select" style="display:none;margin-bottom:8px;"></div>
-      <div id="broadcast-emp-select" style="display:none;margin-bottom:8px;max-height:150px;overflow-y:auto;border:1px solid #eee;border-radius:8px;padding:6px;"></div>
-
-      <button onclick="sendBroadcast()" style="width:100%;padding:12px;border:none;border-radius:10px;background:#E07B1A;color:#fff;font-weight:700;cursor:pointer;">📤 Send Now</button>
-      <div id="broadcast-status" style="margin-top:8px;font-size:12.5px;"></div>
-      <button class="link-btn" onclick="closeAdminModal()" style="display:block;margin:12px auto 0;">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── My Stats Modal ── -->
-<div id="stats-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#fff;border-radius:20px;padding:22px;max-width:380px;width:100%;">
-    <h2 style="font-family:'Rajdhani',sans-serif;color:#1B6B3A;margin-bottom:14px;">📊 My Monthly Stats</h2>
-    <div id="stats-content" style="font-size:13.5px;"></div>
-    <button class="link-btn" onclick="document.getElementById('stats-modal').style.display='none'" style="display:block;margin:14px auto 0;">Close</button>
-  </div>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging.js";
-
-  let deferredInstallPrompt = null;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredInstallPrompt = e;
-    const btn = document.getElementById('install-app-btn');
-    if (btn) btn.style.display = 'block';
-  });
-  window.installApp = async function () {
-    if (!deferredInstallPrompt) return;
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt = null;
-    document.getElementById('install-app-btn').style.display = 'none';
-  };
-
-  // Public client config — safe to expose, not a secret (see README).
-  const firebaseConfig = {
-    apiKey: "AIzaSyDZW1b3to3ojC6LUexZfzsmspdF98y6nvM",
-    authDomain: "safety-kavach-notifications.firebaseapp.com",
-    projectId: "safety-kavach-notifications",
-    storageBucket: "safety-kavach-notifications.firebasestorage.app",
-    messagingSenderId: "1026372115744",
-    appId: "1:1026372115744:web:8a84e4dc63bc945cdccb45"
-  };
-  const VAPID_KEY = "BJ79xBqGYfT8WAKozzZ8D-KgnipuzlFqcfNODOCkZ7xsFrgR9PYgWR0cYrxIY8Mem2gHnlJWLBo4m54pABZ4-ks";
-
-  // ⚠️ TODO: replace with YOUR deployed GAS Web App URL (the same one the main portal calls).
-  const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbzr7RvqlFn-tOUVQ52ilnVymchWbC5yBVAlkn81YovIinHMwkdGLVEgHtEhaX0h7uij/exec";
-  // The portal itself is served by the SAME deployed Web App (doGet() renders it) —
-  // so opening this URL takes the user straight into Safety Kavach.
-  const PORTAL_URL = GAS_ENDPOINT;
-  let redirectTimeoutId = null;
-  let redirectIntervalId = null;
-
-  const app = initializeApp(firebaseConfig);
-  let messaging;
-  try { messaging = getMessaging(app); } catch (e) { console.warn("Messaging init failed (maybe unsupported browser):", e); }
- // Foreground messages (tab open + focused) don't trigger the service
-  // worker's onBackgroundMessage — show them manually via the Notification API.
-  if (messaging) {
-    onMessage(messaging, (payload) => {
-      const title = payload.notification?.title || 'Safety Kavach Alert';
-      const body = payload.notification?.body || '';
-      if (Notification.permission === 'granted') {
-        navigator.serviceWorker.getRegistration().then((reg) => {
-          if (reg) reg.showNotification(title, { body, icon: 'icon-192.png' });
-          else new Notification(title, { body, icon: 'icon-192.png' });
-        });
-      }
-    });
+    document.getElementById('stage-label').textContent = 'All Set';
+    document.getElementById('stage-sub').textContent = 'Notifications are active for ' + savedCode + '.';
+    document.getElementById('stage-open-portal-btn').style.display = 'inline-block';
+    window._currentTapAction = null;
+    openMyStatsAuto(savedCode);
+  } else {
+    showStageOnly();
+    setRippleColor('#2E9E58', null, '#1B6B3A', '#2E9E58');
+    document.getElementById('center-icon').textContent = '✅';
+    document.getElementById('stage-label').textContent = 'All Set';
+    document.getElementById('stage-sub').textContent = 'Notifications are active for ' + savedCode + '.';
+    document.getElementById('stage-open-portal-btn').style.display = 'inline-block';
+    window._currentTapAction = null;
   }
+}
 
-  window.key = function (k) {
-    const inp = document.getElementById('emp-code');
-    if (k === 'back') inp.value = inp.value.slice(0, -1);
-    else if (k === 'clear') inp.value = '';
-    else if (inp.value.length < 8) inp.value += k;
-  };
-
-  function setStatus(msg, ok) {
-    const el = document.getElementById('status');
-    el.textContent = msg;
-    el.className = ok ? 'ok' : 'err';
-  }
-
-  window.registerDevice = async function () {
-    const empCode = document.getElementById('emp-code').value.trim();
-    if (!empCode) { setStatus('Please enter your Employee Code first.', false); return; }
-    if (!('serviceWorker' in navigator) || !messaging) { setStatus('Push notifications are not supported on this browser.', false); return; }
-
-    const btn = document.getElementById('btn-register');
-    btn.disabled = true;
-    setStatus('Requesting permission…', true);
-
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        setStatus('Permission denied — please enable notifications for this app in your device settings.', false);
-        btn.disabled = false;
-        return;
-      }
-
-      const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
-      const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
-
-      if (!token) {
-        setStatus('Could not get a device token. Please try again.', false);
-        btn.disabled = false;
-        return;
-      }
-
-      setStatus('Saving device…', true);
-      const res = await fetch(GAS_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids CORS preflight on GAS
-        body: JSON.stringify({ action: 'savePushToken', data: { employeeCode: empCode, token: token, platform: navigator.platform || 'web' } })
-      });
-      const result = await res.json();
-
-      if (result && result.success) {
-        localStorage.setItem('sk_emp_code', empCode);
-        localStorage.setItem('sk_fcm_token', token);
-        showRegisteredView(empCode, { freshRegistration: true });
-      } else {
-        setStatus((result && result.error) || 'Server did not confirm registration.', false);
-        btn.disabled = false;
-      }
-    } catch (err) {
-      console.error(err);
-      setStatus('Something went wrong: ' + err.message, false);
-      btn.disabled = false;
-    }
-  };
-
-  function showRegisteredView(empCode, opts) {
-    opts = opts || {};
-    document.getElementById('form-view').classList.add('hide');
-    document.getElementById('registered-view').classList.add('show');
-    document.getElementById('registered-emp').textContent = 'Employee Code: ' + empCode;
-
-    const headline = document.getElementById('registered-headline');
-    const subtext  = document.getElementById('registered-subtext');
-    if (opts.freshRegistration) {
-      headline.textContent = '🎉 Notifications enabled for:';
-      subtext.textContent  = "You'll get a push notification whenever something is assigned or updated for you in Safety Kavach.";
+window.handleCenterIconTap = async function () {
+  if (window._currentTapAction === 'install') {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+    } else if (isIOS()) {
+      document.getElementById('ios-install-modal').classList.add('show');
     } else {
-      headline.textContent = 'Welcome back:';
-      subtext.textContent  = 'Tap below to open the Safety Kavach portal.';
+      alert('To install: open your browser menu and choose "Add to Home Screen" or "Install App".');
     }
-
-    // Auto-redirect disabled — user now opens the portal manually via the
-    // "🌐 Open Portal Now" button. Just hide the (now-unused) countdown text.
-    const countdownEl = document.getElementById('redirect-countdown');
-    if (countdownEl) countdownEl.style.display = 'none';
+  } else if (window._currentTapAction === 'enable') {
+    reEnableNotifications();
   }
+};
 
-  function startRedirectCountdown() {
-    if (redirectTimeoutId) clearTimeout(redirectTimeoutId);
-    if (redirectIntervalId) clearInterval(redirectIntervalId);
-    let secondsLeft = 3;
-    const countdownEl = document.getElementById('redirect-countdown');
-    countdownEl.style.display = '';
-    countdownEl.textContent = 'Opening Safety Kavach portal in ' + secondsLeft + '…';
+async function safeFetch(bodyObj) {
+  try {
+    const res = await fetch(GAS_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(bodyObj)
+    });
+    return await res.json();
+  } catch (e) { console.error(e); return null; }
+}
 
-    redirectIntervalId = setInterval(() => {
-      secondsLeft -= 1;
-      if (secondsLeft > 0) countdownEl.textContent = 'Opening Safety Kavach portal in ' + secondsLeft + '…';
-    }, 1000);
+// ── Registration keypad ──
+window.key = function (k) {
+  const inp = document.getElementById('emp-code');
+  if (k === 'back') inp.value = inp.value.slice(0, -1);
+  else if (k === 'clear') inp.value = '';
+  else if (inp.value.length < 8) inp.value += k;
+};
 
-    redirectTimeoutId = setTimeout(() => {
-      // location.replace keeps this in the SAME standalone PWA window
-      // (no new tab, no back-button trail) instead of location.href.
-      window.location.replace(PORTAL_URL);
-    }, 3000);
-  }
+function setRegStatus(msg, ok) {
+  const el = document.getElementById('reg-status');
+  el.textContent = msg;
+  el.className = ok ? 'ok' : 'err';
+}
 
-  window.openPortalNow = function () {
-    if (redirectTimeoutId) clearTimeout(redirectTimeoutId);
-    if (redirectIntervalId) clearInterval(redirectIntervalId);
-    window.location.replace(PORTAL_URL);
-  };
+window.registerDevice = async function () {
+  const empCode = document.getElementById('emp-code').value.trim();
+  if (!empCode) { setRegStatus('Please enter your Employee Code first.', false); return; }
+  if (!('serviceWorker' in navigator) || !messaging) { setRegStatus('Push notifications are not supported on this browser.', false); return; }
 
-  window.cancelRedirectAndSwitch = function () {
-    if (redirectTimeoutId) clearTimeout(redirectTimeoutId);
-    if (redirectIntervalId) clearInterval(redirectIntervalId);
-    switchEmployee();
-  };
+  const btn = document.getElementById('btn-register');
+  btn.disabled = true;
+  setRegStatus('Requesting permission…', true);
 
-  // Re-runs the permission + token + save flow for the CURRENTLY saved
-  // employee code — useful if notifications stopped working (permission
-  // revoked, token went stale) without needing to "switch employee" first.
-  window.reEnableNotifications = async function () {
-    const savedCode = localStorage.getItem('sk_emp_code');
-    if (!savedCode) { switchEmployee(); return; }
-    if (redirectTimeoutId) clearTimeout(redirectTimeoutId);
-    if (redirectIntervalId) clearInterval(redirectIntervalId);
-    document.getElementById('redirect-countdown').style.display = 'none';
-
-    const btn = document.getElementById('btn-reenable');
-    const originalText = btn.textContent;
-    btn.textContent = '🔄 Re-enabling…';
-    btn.disabled = true;
-
-    if (!('serviceWorker' in navigator) || !messaging) {
-      btn.textContent = originalText; btn.disabled = false;
-      alert('Push notifications are not supported on this browser.');
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      setRegStatus('Permission denied — please enable notifications for this app in your device settings.', false);
+      btn.disabled = false;
       return;
     }
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        btn.textContent = originalText; btn.disabled = false;
-        alert('Permission denied — please enable notifications for this app in your device settings.');
-        return;
-      }
-      const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
-      const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
-      if (!token) { btn.textContent = originalText; btn.disabled = false; alert('Could not get a device token. Please try again.'); return; }
+    const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+    const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
+    if (!token) { setRegStatus('Could not get a device token. Please try again.', false); btn.disabled = false; return; }
 
-      const res = await fetch(GAS_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'savePushToken', data: { employeeCode: savedCode, token: token, platform: navigator.platform || 'web' } })
-      });
-      const result = await res.json();
-      btn.textContent = originalText; btn.disabled = false;
-      if (result && result.success) {
-        localStorage.setItem('sk_fcm_token', token);
-        alert('✅ Notifications re-enabled for ' + savedCode);
-        startRedirectCountdown();
-      } else {
-        alert('Server did not confirm registration: ' + ((result && result.error) || 'unknown error'));
-      }
-    } catch (err) {
-      btn.textContent = originalText; btn.disabled = false;
-      alert('Something went wrong: ' + err.message);
-    }
-  };
+    setRegStatus('Saving device…', true);
+    const result = await safeFetch({ action: 'savePushToken', data: { employeeCode: empCode, token: token, platform: navigator.platform || 'web' } });
 
-  window.switchEmployee = function () {
-    if (redirectTimeoutId) clearTimeout(redirectTimeoutId);
-    if (redirectIntervalId) clearInterval(redirectIntervalId);
-    localStorage.removeItem('sk_emp_code');
-    localStorage.removeItem('sk_fcm_token');
-    document.getElementById('registered-view').classList.remove('show');
-    document.getElementById('form-view').classList.remove('hide');
-    document.getElementById('emp-code').value = '';
-    document.getElementById('btn-register').disabled = false;
-    setStatus('', true);
-  };
-
- // Every time the installed app icon is opened, if this device is already
-  // registered, skip the form entirely and go straight into the countdown
-  // → auto-redirect to the portal (the actual "PWA launcher" behavior).
-  window.addEventListener('DOMContentLoaded', () => {
-    const savedCode = localStorage.getItem('sk_emp_code');
-    if (savedCode) {
-      showRegisteredView(savedCode, { freshRegistration: false });
-      checkStatsFeatureFlag();
-    }
-  });
-
-  // ── My Monthly Stats ──
-  async function checkStatsFeatureFlag() {
-    try {
-      const res = await fetch(GAS_ENDPOINT, {
-        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'getPwaFeatureFlags', data: {} })
-      });
-      const result = await res.json();
-      if (result && result.success && result.enableStats) {
-        document.getElementById('btn-my-stats').style.display = 'block';
-      }
-    } catch (e) { console.error(e); }
-  }
-
-  window.openMyStats = async function () {
-    const empCode = localStorage.getItem('sk_emp_code');
-    document.getElementById('stats-modal').style.display = 'flex';
-    document.getElementById('stats-content').innerHTML = 'Loading…';
-    try {
-      const res = await fetch(GAS_ENDPOINT, {
-        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'getMyMonthlyStats', data: { empCode } })
-      });
-      const s = await res.json();
-      if (!s || !s.success) { document.getElementById('stats-content').innerHTML = 'Could not load stats: ' + ((s && s.error) || 'unknown error'); return; }
-      document.getElementById('stats-content').innerHTML = `
-        <div style="margin-bottom:10px;"><b>${s.name}</b> — ${s.monthKey}</div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">🔴 Unsafe Act <b>${s.unsafeActCount}</b></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">🟠 Unsafe Condition <b>${s.unsafeConditionCount}</b></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">🦺 BBS Reported <b>${s.bbsCount}</b>${s.targets.bbs ? ' / ' + s.targets.bbs : ''}</div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">🎓 Training Hrs Received (This Month) <b>${s.trainingHoursReceivedThisMonth}</b>${s.targets.trainingHrs ? ' / ' + s.targets.trainingHrs : ''}</div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;">👨‍🏫 Training Hrs Given (All-Time) <b>${s.trainingHoursGivenAllTime}</b></div>
-      `;
-    } catch (e) { document.getElementById('stats-content').innerHTML = 'Error: ' + e.message; }
-  };
-
-  // ── Admin Tools ──
-  window.openAdminGate = function () {
-    document.getElementById('admin-modal').style.display = 'flex';
-    document.getElementById('admin-pwd-view').style.display = 'block';
-    document.getElementById('admin-tools-view').style.display = 'none';
-    document.getElementById('admin-pwd-input').value = '';
-    document.getElementById('admin-pwd-status').textContent = '';
-  };
-  window.closeAdminModal = function () { document.getElementById('admin-modal').style.display = 'none'; };
-
-  window.checkAdminPwd = async function () {
-    const pwd = document.getElementById('admin-pwd-input').value;
-    const res = await fetch(GAS_ENDPOINT, {
-      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'verifyPwaAdminPassword', data: { password: pwd } })
-    });
-    const result = await res.json();
     if (result && result.success) {
-      document.getElementById('admin-pwd-view').style.display = 'none';
-      document.getElementById('admin-tools-view').style.display = 'block';
-      loadAdminToolsData();
+      localStorage.setItem('sk_emp_code', empCode);
+      localStorage.setItem('sk_fcm_token', token);
+      await computeAndRenderState();
     } else {
-      document.getElementById('admin-pwd-status').textContent = 'Incorrect password.';
+      setRegStatus((result && result.error) || 'Server did not confirm registration.', false);
+      btn.disabled = false;
     }
-  };
-
-  let _activeEmployees = [];
-
-  async function loadAdminToolsData() {
-    const regRes = await fetch(GAS_ENDPOINT, {
-      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'getPwaRegisteredEmployees', data: {} })
-    });
-    const reg = await regRes.json();
-    const listEl = document.getElementById('admin-registered-list');
-    listEl.innerHTML = (reg.employees || []).length
-      ? reg.employees.map(e => `<div>${e['Employee Code']} — ${e['Name'] || '?'} (${e['Department'] || '—'}) · ${e['Device Count']} device(s)</div>`).join('')
-      : '<i>No employees registered yet.</i>';
-
-    const empRes = await fetch(GAS_ENDPOINT, {
-      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'getActiveEmployeesList', data: {} })
-    });
-    const empData = await empRes.json();
-    _activeEmployees = empData.employees || [];
-
-    const depts = [...new Set(_activeEmployees.map(e => e.dept).filter(Boolean))];
-    document.getElementById('broadcast-dept-select').innerHTML = depts.map(d =>
-      `<label style="display:block;font-size:12px;"><input type="checkbox" class="bcast-dept-chk" value="${d}"> ${d}</label>`
-    ).join('');
-    document.getElementById('broadcast-emp-select').innerHTML = _activeEmployees.map(e =>
-      `<label style="display:block;font-size:12px;"><input type="checkbox" class="bcast-emp-chk" value="${e.empCode}"> ${e.name} (${e.empCode})</label>`
-    ).join('');
+  } catch (err) {
+    console.error(err);
+    setRegStatus('Something went wrong: ' + err.message, false);
+    btn.disabled = false;
   }
+};
 
-  window.broadcastTargetChanged = function () {
-    const target = document.querySelector('input[name="bcast-target"]:checked').value;
-    document.getElementById('broadcast-dept-select').style.display = target === 'departments' ? 'block' : 'none';
-    document.getElementById('broadcast-emp-select').style.display = target === 'employees' ? 'block' : 'none';
-  };
+// ── Re-enable notifications (used by amber icon + floating bell) ──
+window.reEnableNotifications = async function () {
+  const savedCode = localStorage.getItem('sk_emp_code');
+  if (!savedCode) { await computeAndRenderState(); return; }
+  if (!('serviceWorker' in navigator) || !messaging) { alert('Push notifications are not supported on this browser.'); return; }
 
-  window.sendBroadcast = async function () {
-    const target = document.querySelector('input[name="bcast-target"]:checked').value;
-    const title = document.getElementById('broadcast-title').value.trim();
-    const message = document.getElementById('broadcast-message').value.trim();
-    if (!message) { document.getElementById('broadcast-status').textContent = 'Please enter a message.'; return; }
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') { alert('Permission denied — please enable notifications for this app in your device settings.'); return; }
+    const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+    const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
+    if (!token) { alert('Could not get a device token. Please try again.'); return; }
 
-    const departments = [...document.querySelectorAll('.bcast-dept-chk:checked')].map(el => el.value);
-    const empCodes = [...document.querySelectorAll('.bcast-emp-chk:checked')].map(el => el.value);
+    const result = await safeFetch({ action: 'savePushToken', data: { employeeCode: savedCode, token: token, platform: navigator.platform || 'web' } });
+    if (result && result.success) {
+      localStorage.setItem('sk_fcm_token', token);
+      await computeAndRenderState();
+    } else {
+      alert('Server did not confirm registration: ' + ((result && result.error) || 'unknown error'));
+    }
+  } catch (err) {
+    alert('Something went wrong: ' + err.message);
+  }
+};
 
-    document.getElementById('broadcast-status').textContent = 'Sending…';
-    const res = await fetch(GAS_ENDPOINT, {
-      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'sendBroadcastPush', data: { title, message, target, departments, empCodes } })
-    });
-    const result = await res.json();
-    document.getElementById('broadcast-status').textContent = result.success
-      ? `✅ Sent to ${result.sent}/${result.targeted} (${result.failed} failed)`
-      : `❌ ${result.error}`;
-  };
+// ── Portal ──
+window.openPortalNow = function () { window.location.href = PORTAL_URL; };
+
+// ── Side menu ──
+window.openSideMenu = function () {
+  const savedCode = localStorage.getItem('sk_emp_code');
+  document.getElementById('side-menu-code').textContent = savedCode ? ('Employee Code: ' + savedCode) : 'Not registered';
+  document.getElementById('side-menu-name').textContent = savedCode ? 'Safety Kavach User' : 'Guest';
+  document.getElementById('side-menu').classList.add('show');
+  document.getElementById('side-menu-overlay').classList.add('show');
+};
+window.closeSideMenu = function () {
+  document.getElementById('side-menu').classList.remove('show');
+  document.getElementById('side-menu-overlay').classList.remove('show');
+};
+window.signOut = function () {
+  localStorage.removeItem('sk_emp_code');
+  localStorage.removeItem('sk_fcm_token');
+  closeSideMenu();
+  computeAndRenderState();
+};
+
+// ── Digital Monthly Stats popup ──
+function animateCount(el, target, suffix) {
+  suffix = suffix || '';
+  let current = 0;
+  const step = Math.max(1, Math.ceil(target / 24));
+  const timer = setInterval(() => {
+    current += step;
+    if (current >= target) { current = target; clearInterval(timer); }
+    el.textContent = current + suffix;
+  }, 35);
+}
+
+async function fetchAndRenderStats(empCode) {
+  const s = await safeFetch({ action: 'getMyMonthlyStats', data: { empCode } });
+  const contentEl = document.getElementById('stats-content');
+  if (!s || !s.success) { contentEl.innerHTML = '<div style="color:#ff6b6b;font-size:13px;">Could not load stats: ' + ((s && s.error) || 'unknown error') + '</div>'; return; }
+
+  document.getElementById('stats-month').textContent = s.name + ' · ' + s.monthKey;
+  contentEl.innerHTML = `
+    <div class="stat-row"><div class="stat-label">🔴 Unsafe Act</div><div class="stat-value red" id="sv-ua">0</div></div>
+    <div class="stat-row"><div class="stat-label">🟠 Unsafe Condition</div><div class="stat-value orange" id="sv-uc">0</div></div>
+    <div class="stat-row"><div class="stat-label">🦺 BBS Reported (This Month)</div><div class="stat-value" id="sv-bbs">0</div></div>
+    <div class="stat-row"><div class="stat-label">🎓 Training Received (This Month)</div><div class="stat-value" id="sv-tr-recv">0</div></div>
+    <div class="stat-row" style="border-bottom:none;"><div class="stat-label">👨‍🏫 Training Given (All-Time)</div><div class="stat-value" id="sv-tr-given">0</div></div>
+  `;
+  animateCount(document.getElementById('sv-ua'), s.unsafeActCount || 0);
+  animateCount(document.getElementById('sv-uc'), s.unsafeConditionCount || 0);
+  animateCount(document.getElementById('sv-bbs'), s.bbsCount || 0);
+  animateCount(document.getElementById('sv-tr-recv'), s.trainingHoursReceivedThisMonth || 0, ' hrs');
+  animateCount(document.getElementById('sv-tr-given'), s.trainingHoursGivenAllTime || 0, ' hrs');
+}
+
+function openMyStatsAuto(empCode) {
+  document.getElementById('stats-modal').classList.add('show');
+  fetchAndRenderStats(empCode);
+}
+window.openMyStatsManually = function () {
+  closeSideMenu();
+  const savedCode = localStorage.getItem('sk_emp_code');
+  if (!savedCode) { alert('Please register first.'); return; }
+  document.getElementById('stats-modal').classList.add('show');
+  fetchAndRenderStats(savedCode);
+};
+window.closeStatsModal = function () { document.getElementById('stats-modal').classList.remove('show'); };
+
+// ── Admin Tools ──
+window.openAdminGate = function () {
+  closeSideMenu();
+  document.getElementById('admin-modal').classList.add('show');
+  document.getElementById('admin-pwd-view').style.display = 'block';
+  document.getElementById('admin-tools-view').style.display = 'none';
+  document.getElementById('admin-pwd-input').value = '';
+  document.getElementById('admin-pwd-status').textContent = '';
+};
+window.closeAdminModal = function () { document.getElementById('admin-modal').classList.remove('show'); };
+
+window.checkAdminPwd = async function () {
+  const pwd = document.getElementById('admin-pwd-input').value;
+  const result = await safeFetch({ action: 'verifyPwaAdminPassword', data: { password: pwd } });
+  if (result && result.success === true) {
+    document.getElementById('admin-pwd-view').style.display = 'none';
+    document.getElementById('admin-tools-view').style.display = 'block';
+    loadAdminToolsData();
+  } else if (result && result.error) {
+    document.getElementById('admin-pwd-status').textContent = 'Server error: ' + result.error;
+  } else {
+    document.getElementById('admin-pwd-status').textContent = 'Incorrect password.';
+  }
+};
+
+let _activeEmployees = [];
+async function loadAdminToolsData() {
+  const reg = await safeFetch({ action: 'getPwaRegisteredEmployees', data: {} });
+  document.getElementById('admin-registered-list').innerHTML = (reg && reg.employees || []).length
+    ? reg.employees.map(e => `<div>${e['Employee Code']} — ${e['Name'] || '?'} (${e['Department'] || '—'}) · ${e['Device Count']} device(s)</div>`).join('')
+    : '<i>No employees registered yet.</i>';
+
+  const empData = await safeFetch({ action: 'getActiveEmployeesList', data: {} });
+  _activeEmployees = (empData && empData.employees) || [];
+
+  const depts = [...new Set(_activeEmployees.map(e => e.dept).filter(Boolean))];
+  document.getElementById('broadcast-dept-select').innerHTML = depts.map(d =>
+    `<label style="display:block;font-size:12px;"><input type="checkbox" class="bcast-dept-chk" value="${d}"> ${d}</label>`
+  ).join('');
+  document.getElementById('broadcast-emp-select').innerHTML = _activeEmployees.map(e =>
+    `<label style="display:block;font-size:12px;"><input type="checkbox" class="bcast-emp-chk" value="${e.empCode}"> ${e.name} (${e.empCode})</label>`
+  ).join('');
+}
+
+window.broadcastTargetChanged = function () {
+  const target = document.querySelector('input[name="bcast-target"]:checked').value;
+  document.getElementById('broadcast-dept-select').style.display = target === 'departments' ? 'block' : 'none';
+  document.getElementById('broadcast-emp-select').style.display = target === 'employees' ? 'block' : 'none';
+};
+
+window.sendBroadcast = async function () {
+  const target = document.querySelector('input[name="bcast-target"]:checked').value;
+  const title = document.getElementById('broadcast-title').value.trim();
+  const message = document.getElementById('broadcast-message').value.trim();
+  if (!message) { document.getElementById('broadcast-status').textContent = 'Please enter a message.'; return; }
+
+  const departments = [...document.querySelectorAll('.bcast-dept-chk:checked')].map(el => el.value);
+  const empCodes = [...document.querySelectorAll('.bcast-emp-chk:checked')].map(el => el.value);
+
+  document.getElementById('broadcast-status').textContent = 'Sending…';
+  const result = await safeFetch({ action: 'sendBroadcastPush', data: { title, message, target, departments, empCodes } });
+  document.getElementById('broadcast-status').textContent = (result && result.success)
+    ? `✅ Sent to ${result.sent}/${result.targeted} (${result.failed} failed)`
+    : `❌ ${(result && result.error) || 'unknown error'}`;
+};
+
+// ── Boot ──
+window.addEventListener('DOMContentLoaded', computeAndRenderState);
+window.addEventListener('visibilitychange', () => { if (!document.hidden) computeAndRenderState(); });
 </script>
 </body>
 </html>
