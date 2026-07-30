@@ -217,6 +217,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
     My Monthly Stats
   </div>
+  <div class="side-menu-item" onclick="openQuizGate()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.11"/><circle cx="12" cy="8" r="7"/></svg>
+    Quiz Competition
+  </div>
   <div class="side-menu-item" onclick="openAdminGate()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     Admin Tools
@@ -254,6 +258,36 @@
   </div>
 </div>
 
+<!-- ── Quiz: Join Screen ── -->
+<div class="modal-overlay" id="quiz-join-modal">
+  <div class="modal-card">
+    <div class="modal-title">🏆 Quiz Competition</div>
+    <div id="quiz-join-content" style="font-size:13.5px;color:var(--text-muted);">Checking for a live quiz…</div>
+    <button class="link-btn" onclick="document.getElementById('quiz-join-modal').classList.remove('show')">Close</button>
+  </div>
+</div>
+
+<!-- ── Quiz: Taking Screen (full overlay, not the small card modal) ── -->
+<div class="modal-overlay" id="quiz-taking-modal">
+  <div class="modal-card" style="max-width:480px;">
+    <div class="modal-title" id="quiz-taking-title">🏆 Quiz</div>
+    <div id="quiz-reshuffle-note" style="display:none;background:var(--orange-pale);color:var(--orange);font-size:11.5px;font-weight:700;padding:8px 12px;border-radius:8px;margin-bottom:10px;">🔀 App was minimized — unanswered questions have been reshuffled!</div>
+    <div id="quiz-questions-container"></div>
+    <button class="adm-btn-primary" onclick="submitQuizAnswers()" style="margin-top:6px;">Submit Quiz</button>
+  </div>
+</div>
+
+<!-- ── Quiz: Result + Leaderboard ── -->
+<div class="modal-overlay" id="quiz-result-modal">
+  <div class="modal-card">
+    <div class="modal-title">🏆 Quiz Result</div>
+    <div id="quiz-result-content"></div>
+    <div class="adm-section-label">Leaderboard</div>
+    <div id="quiz-leaderboard-content" class="adm-list-box"></div>
+    <button class="link-btn" onclick="document.getElementById('quiz-result-modal').classList.remove('show')">Close</button>
+  </div>
+</div>
+
 <!-- ── Admin Tools Modal ── -->
 <div class="modal-overlay" id="admin-modal">
   <div class="modal-card">
@@ -284,6 +318,32 @@
 
       <button class="adm-btn-secondary" onclick="sendBroadcast()">Send Now</button>
       <div id="broadcast-status" style="margin-top:8px;font-size:12.5px;"></div>
+
+      <div class="adm-section-label">🏆 Quiz Competition</div>
+      <div id="quiz-admin-status" style="font-size:12px;color:var(--text-muted);margin-bottom:8px;"></div>
+      <div id="quiz-admin-start-form">
+        <input type="text" id="quiz-title-input" class="adm-input" placeholder="Quiz Title (e.g. Monthly Safety Quiz)">
+        <div style="display:flex;gap:6px;margin-bottom:8px;font-size:12px;">
+          <label style="flex:1;"><input type="radio" name="quiz-source" value="all" checked onchange="quizSourceChanged()"> All Sheets</label>
+          <label style="flex:1;"><input type="radio" name="quiz-source" value="specific" onchange="quizSourceChanged()"> Specific</label>
+        </div>
+        <div id="quiz-sheet-select" class="adm-list-box" style="display:none;margin-bottom:8px;"></div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <input type="number" id="quiz-question-count" class="adm-input" placeholder="No. of Questions" value="10" style="margin-bottom:0;">
+          <select id="quiz-duration" class="adm-input" style="margin-bottom:0;">
+            <option value="15">15 min</option>
+            <option value="30" selected>30 min</option>
+            <option value="60">1 hour</option>
+            <option value="1440">All day</option>
+          </select>
+        </div>
+        <button class="adm-btn-secondary" onclick="startQuiz()">🏆 Start Quiz Competition</button>
+      </div>
+      <div id="quiz-admin-live-view" style="display:none;">
+        <div style="font-size:12.5px;margin-bottom:8px;">Join Password: <b id="quiz-live-password" style="font-size:18px;letter-spacing:3px;color:var(--primary);"></b></div>
+        <button class="adm-btn-secondary" style="background:linear-gradient(135deg,var(--red),#a93226);" onclick="endQuiz()">⏹ End Quiz Competition</button>
+      </div>
+
       <button class="link-btn" onclick="closeAdminModal()">Close</button>
     </div>
   </div>
@@ -554,7 +614,7 @@ window.closeAdminModal = function () { document.getElementById('admin-modal').cl
 window.checkAdminPwd = async function () {
   const pwd = document.getElementById('admin-pwd-input').value;
   const result = await safeFetch({ action: 'verifyPwaAdminPassword', data: { password: pwd } });
-  if (result && result.success === true) { document.getElementById('admin-pwd-view').style.display = 'none'; document.getElementById('admin-tools-view').style.display = 'block'; loadAdminToolsData(); }
+  if (result && result.success === true) { document.getElementById('admin-pwd-view').style.display = 'none'; document.getElementById('admin-tools-view').style.display = 'block'; loadAdminToolsData(); loadQuizAdminSection(); }
   else if (result && result.error) document.getElementById('admin-pwd-status').textContent = 'Server error: ' + result.error;
   else document.getElementById('admin-pwd-status').textContent = 'Incorrect password.';
 };
@@ -585,6 +645,170 @@ window.sendBroadcast = async function () {
   document.getElementById('broadcast-status').textContent = 'Sending…';
   const result = await safeFetch({ action: 'sendBroadcastPush', data: { title, message, target, departments, empCodes } });
   document.getElementById('broadcast-status').textContent = (result && result.success) ? `Sent to ${result.sent}/${result.targeted} (${result.failed} failed)` : `${(result && result.error) || 'unknown error'}`;
+};
+
+// ============================================================
+// QUIZ COMPETITION
+// ============================================================
+let _quizState = null; // { competitionId, questions: [...], answers: {}, startedAt }
+let _quizBackgroundedWhileActive = false;
+
+window.openQuizGate = async function () {
+  closeSideMenu();
+  document.getElementById('quiz-join-modal').classList.add('show');
+  document.getElementById('quiz-join-content').innerHTML = 'Checking for a live quiz…';
+  const res = await safeFetch({ action: 'getActiveQuizCompetition', data: {} });
+  if (!res || !res.success || !res.competition) {
+    document.getElementById('quiz-join-content').innerHTML = '<div style="text-align:center;color:var(--text-muted);">No live quiz competition right now. Check back later!</div>';
+    return;
+  }
+  const comp = res.competition;
+  document.getElementById('quiz-join-content').innerHTML = `
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:16px;color:var(--primary-dark);">${comp['Title']}</div>
+      <div style="font-size:12px;color:var(--text-muted);">${comp['Question Count']} questions</div>
+    </div>
+    <input type="tel" id="quiz-join-pw" maxlength="4" class="adm-input" placeholder="4-digit Join Password" style="text-align:center;font-size:20px;letter-spacing:6px;">
+    <button class="adm-btn-primary" onclick="startQuizAttempt('${comp['Competition ID']}')">Join & Start →</button>
+    <div id="quiz-join-error" style="margin-top:8px;font-size:12px;color:var(--red);"></div>
+  `;
+};
+
+window.startQuizAttempt = async function (competitionId) {
+  const pw = document.getElementById('quiz-join-pw').value.trim();
+  const empCode = localStorage.getItem('sk_emp_code');
+  if (!empCode) { document.getElementById('quiz-join-error').textContent = 'Please register your Employee Code first.'; return; }
+  const res = await safeFetch({ action: 'joinQuizCompetition', data: { competitionId, password: pw, empCode } });
+  if (!res || !res.success) { document.getElementById('quiz-join-error').textContent = (res && res.error) || 'Could not join quiz.'; return; }
+
+  document.getElementById('quiz-join-modal').classList.remove('show');
+  _quizState = {
+    competitionId, empCode, name: res.name, dept: res.dept,
+    questions: res.questions, answers: {}, startedAt: new Date().toISOString()
+  };
+  document.getElementById('quiz-taking-title').textContent = '🏆 ' + res.title;
+  renderQuizQuestions();
+  document.getElementById('quiz-taking-modal').classList.add('show');
+};
+
+function renderQuizQuestions() {
+  const container = document.getElementById('quiz-questions-container');
+  container.innerHTML = _quizState.questions.map((q, idx) => `
+    <div class="quiz-q-card" data-key="${q.key}" style="background:var(--green-pale);border:1.5px solid var(--green-pale2);border-radius:14px;padding:14px;margin-bottom:12px;">
+      <div style="font-weight:700;font-size:13.5px;margin-bottom:10px;color:var(--text);">${idx + 1}. ${q.text}</div>
+      ${['A','B','C','D'].map(letter => `
+        <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:6px;cursor:pointer;background:var(--surface);">
+          <input type="radio" name="q_${q.key.replace(':','_')}" value="${letter}" ${_quizState.answers[q.key] === letter ? 'checked' : ''}
+            onchange="quizAnswerChanged('${q.key}','${letter}')" style="width:16px;height:16px;accent-color:var(--primary);">
+          <span style="font-size:13px;">${letter}) ${q[letter]}</span>
+        </label>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+window.quizAnswerChanged = function (key, letter) {
+  _quizState.answers[key] = letter;
+};
+
+// ── Anti-cheat: reshuffle unanswered questions whenever the app is backgrounded ──
+document.addEventListener('visibilitychange', () => {
+  if (!_quizState) return;
+  if (document.hidden) {
+    _quizBackgroundedWhileActive = true;
+  } else if (_quizBackgroundedWhileActive) {
+    _quizBackgroundedWhileActive = false;
+    const answered = _quizState.questions.filter(q => _quizState.answers[q.key] !== undefined);
+    const unanswered = _quizState.questions.filter(q => _quizState.answers[q.key] === undefined);
+    for (let i = unanswered.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [unanswered[i], unanswered[j]] = [unanswered[j], unanswered[i]];
+    }
+    _quizState.questions = [...answered, ...unanswered]; // answered questions stay put; unanswered shuffled to the end in new random order
+    renderQuizQuestions();
+    const note = document.getElementById('quiz-reshuffle-note');
+    note.style.display = 'block';
+    setTimeout(() => { note.style.display = 'none'; }, 4000);
+  }
+});
+
+window.submitQuizAnswers = async function () {
+  if (!_quizState) return;
+  const keys = _quizState.questions.map(q => q.key);
+  const unansweredCount = keys.filter(k => _quizState.answers[k] === undefined).length;
+  if (unansweredCount > 0 && !confirm(unansweredCount + ' question(s) left unanswered. Submit anyway?')) return;
+
+  const res = await safeFetch({
+    action: 'submitQuizResponse',
+    data: {
+      competitionId: _quizState.competitionId, empCode: _quizState.empCode,
+      name: _quizState.name, dept: _quizState.dept,
+      answers: _quizState.answers, questionKeys: keys, startedAt: _quizState.startedAt
+    }
+  });
+  document.getElementById('quiz-taking-modal').classList.remove('show');
+  if (!res || !res.success) { alert((res && res.error) || 'Submit failed.'); return; }
+
+  document.getElementById('quiz-result-content').innerHTML = `
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:34px;font-weight:700;color:var(--primary);">${res.score}%</div>
+      <div style="font-size:12.5px;color:var(--text-muted);">${res.correctCount} / ${res.total} correct</div>
+    </div>
+  `;
+  const lb = await safeFetch({ action: 'getQuizLeaderboard', data: { competitionId: _quizState.competitionId } });
+  document.getElementById('quiz-leaderboard-content').innerHTML = (lb && lb.leaderboard || []).length
+    ? lb.leaderboard.map((e, i) => `<div>${i + 1}. ${e.name} (${e.dept || '—'}) — <b>${e.score}%</b></div>`).join('')
+    : '<i>No entries yet.</i>';
+  document.getElementById('quiz-result-modal').classList.add('show');
+  _quizState = null;
+};
+
+// ── Admin: Start/End Quiz Competition (inside Admin Tools) ──
+let _quizEvalSheets = [];
+async function loadQuizAdminSection() {
+  const active = await safeFetch({ action: 'getActiveQuizCompetition', data: {} });
+  if (active && active.success && active.competition) {
+    document.getElementById('quiz-admin-start-form').style.display = 'none';
+    document.getElementById('quiz-admin-live-view').style.display = 'block';
+    document.getElementById('quiz-admin-status').textContent = 'Live: ' + active.competition['Title'];
+    // Password only known to whoever started it — re-fetch isn't exposed by getActiveQuizCompetition
+    // for security, so just show a placeholder; admin already has it from when they started it.
+    document.getElementById('quiz-live-password').textContent = '••••';
+    window._liveQuizCompetitionId = active.competition['Competition ID'];
+  } else {
+    document.getElementById('quiz-admin-start-form').style.display = 'block';
+    document.getElementById('quiz-admin-live-view').style.display = 'none';
+    document.getElementById('quiz-admin-status').textContent = '';
+  }
+  const sheetsRes = await safeFetch({ action: 'getQuizEvalSheetsList', data: {} });
+  _quizEvalSheets = (sheetsRes && sheetsRes.sheets) || [];
+  document.getElementById('quiz-sheet-select').innerHTML = _quizEvalSheets.map(s =>
+    `<label style="display:block;font-size:12px;"><input type="checkbox" class="quiz-sheet-chk" value="${s.evalId}"> ${s.topic} (${s.difficulty}, ${s.noOfQuestions} Qs)</label>`
+  ).join('') || '<i>No Ready evaluation sheets found.</i>';
+}
+window.quizSourceChanged = function () {
+  const mode = document.querySelector('input[name="quiz-source"]:checked').value;
+  document.getElementById('quiz-sheet-select').style.display = mode === 'specific' ? 'block' : 'none';
+};
+window.startQuiz = async function () {
+  const title = document.getElementById('quiz-title-input').value.trim() || 'Safety Quiz Competition';
+  const sourceMode = document.querySelector('input[name="quiz-source"]:checked').value;
+  const evalIds = [...document.querySelectorAll('.quiz-sheet-chk:checked')].map(el => el.value);
+  const questionCount = parseInt(document.getElementById('quiz-question-count').value, 10) || 10;
+  const durationMinutes = parseInt(document.getElementById('quiz-duration').value, 10);
+
+  const res = await safeFetch({ action: 'startQuizCompetition', data: { title, sourceMode, evalIds, questionCount, durationMinutes, startedBy: 'PWA Admin' } });
+  if (!res || !res.success) { alert((res && res.error) || 'Could not start quiz.'); return; }
+  document.getElementById('quiz-admin-start-form').style.display = 'none';
+  document.getElementById('quiz-admin-live-view').style.display = 'block';
+  document.getElementById('quiz-admin-status').textContent = 'Live: ' + title;
+  document.getElementById('quiz-live-password').textContent = res.joinPassword;
+  window._liveQuizCompetitionId = res.competitionId;
+};
+window.endQuiz = async function () {
+  if (!window._liveQuizCompetitionId) return;
+  await safeFetch({ action: 'endQuizCompetition', data: { competitionId: window._liveQuizCompetitionId } });
+  loadQuizAdminSection();
 };
 
 window.addEventListener('DOMContentLoaded', async () => {
