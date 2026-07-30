@@ -325,7 +325,11 @@ window._currentTapAction = null;
 function renderInstallState() {
   showStageOnly();
   setRippleColor('#2E9E58', null, '#1B6B3A', '#2E9E58');
-  document.getElementById('center-icon').textContent = '📲';
+  // Use the ACTUAL app icon (same PNG referenced in manifest.json / that
+  // will appear on the home screen) instead of an emoji, so this button
+  // visually previews exactly what gets installed.
+  document.getElementById('center-icon').innerHTML =
+    '<img src="icon-192.png" alt="Install Safety Kavach" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
   document.getElementById('stage-label').textContent = 'Tap to Install App';
   document.getElementById('stage-sub').textContent = 'Install Safety Kavach Alerts to your home screen to receive instant notifications.';
   window._currentTapAction = 'install';
